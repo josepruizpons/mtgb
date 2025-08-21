@@ -1,8 +1,8 @@
 
 import styles from './app.module.scss'
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { get_json } from "./api"
-import type { Card } from './types';
+import { type Deck, type Card } from './types';
 
 type ScryfallAutocompleteSuggestions = {
   total_values: number;
@@ -28,7 +28,7 @@ const CardSearch = () => {
     set_search(new_value)
     if (new_value.length < 3) return
 
-    const response = await get_json<ScryfallAutocompleteSuggestions>(`https://api.scryfall.com/cards/autocomplete?q=${new_value}`)
+    const response = await get_json<ScryfallAutocompleteSuggestions>(`https://api.scryfall.com/cards/autocomplete?q=${new_value}`, { external: true })
     if ('errors' in response) {
       return
     }
@@ -36,7 +36,7 @@ const CardSearch = () => {
 
   }
   const search_card = async (card_name: string) => {
-    const response = await get_json<ScryfallCard>(`https://api.scryfall.com/cards/named?exact=${card_name}`)
+    const response = await get_json<ScryfallCard>(`https://api.scryfall.com/cards/named?exact=${card_name}`, { external: true })
     if ('errors' in response) {
       return
     }
@@ -82,10 +82,45 @@ const CardSearch = () => {
     </>
   )
 }
+
+const DecksList = () => {
+  const [decks, set_decks] = useState<Deck[]>([])
+
+  useEffect(() => {
+    const init = async () => {
+      const response = await get_json<Deck[]>('/decks')
+      if ('errors' in response) {
+        return
+      }
+      set_decks(response)
+    }
+    init()
+
+  }, [])
+
+  return (
+    <section className={styles['decks-list']}>
+      {
+        decks.map(deck => (
+          <div key={deck.id}>
+            <span>Name</span>
+            <span>{deck.name}</span>
+          </div>
+        ))
+      }
+    </section>
+  )
+
+
+}
+
 function App() {
 
   return (
-    <CardSearch />
+    <div>
+      <CardSearch />
+      <DecksList />
+    </div>
   )
 }
 

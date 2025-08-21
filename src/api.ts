@@ -1,5 +1,6 @@
 type ApiParams = {
   aborter?: AbortController;
+  external?: boolean;
 }
 
 type SendApiParams = {
@@ -24,7 +25,6 @@ const deserialize_response = async<T>(
 }
 
 const DEFAULT_OPTIONS = {
-  // credentials: 'include',
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json'
@@ -35,12 +35,22 @@ export const get_json = async <T>(
   url: string,
   params: ApiParams = {}
 ) => {
-  const { aborter = undefined } = params
+
+  const { aborter = undefined, external = false } = params
+
+  let _url = url;
+  if (!external) {
+    _url = 'http://localhost:4000' + url // TODO: get from env
+
+  }
+
   const response = await fetch(
-    url,
+  _url,
     {
       signal: aborter?.signal,
       ...DEFAULT_OPTIONS,
+      // credentials: 'include',
+      // ...(!external ? { credentials: 'include' } : {})
     },
   )
 

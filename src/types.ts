@@ -5,3 +5,9 @@ export type Card = {
   description: string;
   image: string;
 }
+
+export type Deck = {
+  id: string;
+  name: string;
+  cards_ids_list: string[];
+}
